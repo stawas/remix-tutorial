@@ -22,6 +22,8 @@ import { useEffect } from "react";
 
 import appStyleHref from "./app.css?url";
 import { ContactRecord, createEmptyContact, getContacts } from "./data";
+import { login } from "./data/auth.remote";
+import { User } from "~/model/users.model";
 
 export const action = async () => {
   const contact: ContactRecord = await createEmptyContact();
@@ -37,6 +39,13 @@ export const loader = async ({
 }: LoaderFunctionArgs) => {
   const url: URL = new URL(request.url);
   const q: string | null = url.searchParams.get("q");
+  const user: User = {
+    Email:"spock@example.com",
+    Password:"ldoiekr983lko39"
+  };
+  const isLoginSuccess = await login(user);
+  console.log(`isLoginSuccess: ${isLoginSuccess.accessToken}`);
+  //TODO call api to get books
   const contacts: ContactRecord[] = await getContacts(q);
   return Response.json({ contacts, q });
 }

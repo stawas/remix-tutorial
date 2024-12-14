@@ -265,6 +265,10 @@ i {
   transition-delay: 200ms;
 }
 
+#contact-list {
+  display: flex;
+}
+
 #contact {
   max-width: 40rem;
   display: flex;

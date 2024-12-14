@@ -1,4 +1,6 @@
-export type LoginResponse = {
-    isSuccess: boolean;
-    accessToken: string;
+import { BaseResponse } from "./base.response";
+
+export type LoginResponse = BaseResponse & {
+    accessToken: string | null;
+    expired: Date | null;
 }

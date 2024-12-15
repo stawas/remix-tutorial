@@ -17,7 +17,7 @@ export function toUserModel({ formData }: { formData: FormData }): User {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function devLog(message?: any, ...optionalParams: any[]) {
-    if(process.env.NODE_ENV === "production") return;
+    if (process.env.NODE_ENV === "production") return;
     console.log(message, ...optionalParams);
 }
 

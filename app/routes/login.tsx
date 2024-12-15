@@ -9,6 +9,7 @@ import {
 import { login } from "app/data/auth.remote";
 import { devLog, toUserModel } from "app/utils";
 import { accessToken, commitSession, error, getSession } from "app/sessions";
+import { LoginResponse } from "~/data/response/login.response";
 
 export async function loader({
     request,
@@ -24,12 +25,10 @@ export async function loader({
 
     const data = { error: session.get(error) };
     devLog(data);
-    
+
     return Response.json(data, {
         headers: {
-            "Set-Cookie": await commitSession(session, {
-                
-            }),
+            "Set-Cookie": await commitSession(session),
         },
     });
 }
@@ -39,9 +38,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         request.headers.get("Cookie")
     );
     const formData: FormData = await request.formData();
-    const response = await login(toUserModel({ formData: formData }));
-    if (response.isSuccess === false && response.accessToken == null) {
-        session.flash(error, "Invalid username/password");
+    const response: LoginResponse = await login(toUserModel({ formData: formData }));
+    if (response.isError === true || response.accessToken === null) {
+        session.flash(error, response.errorMessage ?? "");
         // Redirect back to the login page with errors.
         return redirect("/login", {
             headers: {
@@ -55,7 +54,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return redirect("/login", {
         headers: {
             "Set-Cookie": await commitSession(session, {
-                expires: response.expired ?? undefined,
+                expires: response.expires ?? undefined,
             }),
         },
     });
@@ -70,20 +69,22 @@ Password:ldoiekr983lko39
 export default function Login() {
     const { error } = useLoaderData<typeof loader>();
     return (
-        <div>
-            <p>Login</p>
-            {error ? <div className="error">{error}</div> : null}
-            <form method="post">
-                <label htmlFor="email">
-                    Email
-                </label>
-                <input id="email" name="email" type="email" value={`spock@example.com`}/>
-                <label htmlFor="password">
-                    Password
-                </label>
-                <input id="password" name="password" type="password" value={`ldoiekr983lko39`}/>
-                <button>Login</button>
-            </form>
+        <div className="container full-width center-main-axis margin-top-16">
+            <div className="container direction-column spacing-v-16">
+                <p>Login</p>
+                <form method="post" className="container direction-column spacing-v-16">
+                    <label htmlFor="email">
+                        Email
+                    </label>
+                    <input id="email" name="email" type="email" defaultValue={`spock@example.com`} />
+                    <label htmlFor="password">
+                        Password
+                    </label>
+                    <input id="password" name="password" type="password" defaultValue={`ldoiekr983lko39`} />
+                    <button>Login</button>
+                </form>
+                {error ? <div className="error">{error}</div> : null}
+            </div>
         </div>
     );
 }

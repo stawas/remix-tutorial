@@ -14,31 +14,27 @@ export async function login(user: User): Promise<LoginResponse> {
         body: body,
     });
     const response: Response = await fetch(request);
-    if(!response.ok) {
+    const responseBody: LoginResponse = await response.json();
+    if(!response.ok || responseBody.isError || !responseBody.accessToken) {
         return {
-            isSuccess: false,
-            accessToken: null,
-            errorMessage: `Error: ${response.status}`,
-            expired: null,
+            isError: responseBody.isError,
+            errorMessage: responseBody.errorMessage,
         }
     }
 
-    const token: string[] | null = response.headers.getSetCookie();
-    const cliams = token[0].split("; ");
     // login response: jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzQ0NTA2OTQsInVzZXJfaWQiOjF9._u_TQUTOKnjhFza5lFyCvASyXwpudD6BBuq9iO3-k0c,expires=Tue, 17 Dec 2024 15:51:34 GMT,path=/,HttpOnly,SameSite=Lax
-    const jwt = cliams[0].split("=")[1];
-    const expired = cliams[1].split("=")[1];
+    const token = responseBody.accessToken!;
+    const expires = responseBody.expires ?? "";
     devLog(`
         login response:\n
-        jwt: ${jwt}\n
-        expired: ${expired}\n
+        jwt: ${token}\n
+        expired: ${expires}\n
         `);
 
     const loginResponse: LoginResponse = {
-        isSuccess: response.ok,
-        accessToken: jwt ?? "",
-        errorMessage: null,
-        expired: new Date(expired),
+        isError: responseBody.isError,
+        accessToken: token,
+        expires: new Date(expires),
     };
 
     return loginResponse;

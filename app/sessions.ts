@@ -1,4 +1,4 @@
-import { createCookieSessionStorage, redirect, Session } from "@remix-run/node";
+import { createCookieSessionStorage, redirect } from "@remix-run/node";
 
 export const accessToken = "accessToken"
 export const error = "error"
@@ -27,19 +27,7 @@ const { getSession, commitSession, destroySession } =
 
 export async function requireUserSession(
     request: Request
-): Promise<Session> {
-    const session = await getSession(
-        request.headers.get("Cookie")
-    );
-
-    if (!session.has(accessToken)) {
-        throw redirect("/login");
-    }
-
-    return session;
-}
-
-export async function getAccessToken(request: Request): Promise<string> {
+): Promise<string> {
     const session = await getSession(
         request.headers.get("Cookie")
     );

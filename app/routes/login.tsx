@@ -81,7 +81,7 @@ export default function Login() {
                         Password
                     </label>
                     <input id="password" name="password" type="password" defaultValue={`ldoiekr983lko39`} />
-                    <button>Login</button>
+                    <button type="submit">Login</button>
                 </form>
                 {error ? <div className="error">{error}</div> : null}
             </div>

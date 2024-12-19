@@ -18,7 +18,7 @@ import {
 import { FunctionComponent, useEffect } from "react";
 
 import { ContactRecord, createEmptyContact } from "app/data";
-import { getBooks } from "~/data/books.remote";
+import { requestAllBooks } from "~/data/books.remote";
 import { BookListResponse } from "~/data/response/book.response";
 
 
@@ -32,7 +32,7 @@ export const loader = async ({
 }: LoaderFunctionArgs) => {
   const url: URL = new URL(request.url);
   const q: string | null = url.searchParams.get("q");
-  const books: BookListResponse = await getBooks(request);
+  const books: BookListResponse = await requestAllBooks(request);
   return Response.json({ books, q });
 }
 

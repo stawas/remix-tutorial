@@ -1,19 +1,20 @@
-import type { 
+import type {
   ActionFunctionArgs,
   LoaderFunctionArgs
- } from "@remix-run/node";
+} from "@remix-run/node";
 import invariant from "tiny-invariant";
-import { 
-  Form, 
-  useFetcher,
+import {
+  Form,
   useLoaderData,
- } from "@remix-run/react";
+} from "@remix-run/react";
 import type { FunctionComponent } from "react";
 
-import type { ContactRecord } from "../data";
-import { getContact, updateContact } from "../data";
+import { updateContact } from "../data";
+import { requestBook } from "~/data/books.remote";
+import { Author, BookResponse } from "~/data/response/book.response";
+import { isNull, isNullOrEmpty, isNullOrEmptyOrBlank } from "~/utils";
 
-export const action = async({
+export const action = async ({
   params,
   request,
 }: ActionFunctionArgs) => {
@@ -25,53 +26,46 @@ export const action = async({
 };
 
 export const loader = async ({
-    params,
-  }: LoaderFunctionArgs) => {
-    invariant(params.contactId, "Missing contactId param");
-    const contact: ContactRecord | null = await getContact(params.contactId);
-    if (!contact) {
-        throw new Response("Not Found", { status: 404 });
-      }
-    return Response.json({ contact });
-  };
+  params,
+  request,
+}: LoaderFunctionArgs) => {
+  invariant(params.contactId, "Missing bookId param");
+  const book: BookResponse | null = await requestBook(request, params.contactId);
+  if (!book) {
+    throw new Response("Not Found", { status: 404 });
+  }
+  return Response.json({ book: book });
+};
 
 export default function Contact() {
-  const { contact } = useLoaderData<typeof loader>();
+  const { book: book }: { book: BookResponse } = useLoaderData<typeof loader>();
 
+  const showAuthors: boolean = !isNullOrEmpty([book.authors]);
+  const showBookName: boolean = !isNullOrEmptyOrBlank(book.publisher?.name);
+  const showPrice: boolean = !isNull(book.price);
+  const showDescription: boolean = !isNullOrEmptyOrBlank(book.description);
+  
   return (
     <div id="contact">
       <div>
-        <img
-          alt={`${contact.first} ${contact.last} avatar`}
-          key={contact.avatar}
-          src={contact.avatar}
-        />
-      </div>
-
-      <div>
         <h1>
-          {contact.first || contact.last ? (
+          {book.name ? (
             <>
-              {contact.first} {contact.last}
+              {book.name}
             </>
           ) : (
             <i>No Name</i>
-          )}{" "}
-          <Favorite contact={contact} />
+          )}
         </h1>
-
-        {contact.twitter ? (
+        <br/>
+        {showPrice ? <p>{book.price} baht</p> : null}
+        {showDescription ? (
           <p>
-            <a
-              href={`https://twitter.com/${contact.twitter}`}
-            >
-              {contact.twitter}
-            </a>
+            {book.description}
           </p>
         ) : null}
-
-        {contact.notes ? <p>{contact.notes}</p> : null}
-
+        {showBookName ? <p>Publish by {book.publisher?.name}</p> : null}
+        {showAuthors ? <Authors authors={book.authors!} /> : null}
         <div>
           <Form action="edit">
             <button type="submit">Edit</button>
@@ -97,27 +91,16 @@ export default function Contact() {
   );
 }
 
-const Favorite: FunctionComponent<{
-  contact: Pick<ContactRecord, "favorite">;
-}> = ({ contact }) => {
-  const fetcher = useFetcher();
-  const favorite = fetcher.formData 
-  ? fetcher.formData.get("favorite") === "true"
-  : contact.favorite;
-
-  return (
-    <fetcher.Form method="post">
-      <button
-        aria-label={
-          favorite
-            ? "Remove from favorites"
-            : "Add to favorites"
-        }
-        name="favorite"
-        value={favorite ? "false" : "true"}
-      >
-        {favorite ? "★" : "☆"}
-      </button>
-    </fetcher.Form>
-  );
-};
+const Authors: FunctionComponent<{ authors: Author[] }>
+  = ({ authors }) => {
+    return (
+      <div>
+        <p>Written by</p>
+        <ol>
+          {authors.map((author) => (
+            <li key={author.ID}>{author.name}</li>
+          ))}
+        </ol>
+      </div>
+    );
+  }

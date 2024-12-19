@@ -14,7 +14,7 @@ import appStyleHref from "./app.css?url";
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStyleHref },
 ];
-// TODO view book detail
+
 // TODO create book detail
 // TODO edit book detail
 // TODO delete book detail

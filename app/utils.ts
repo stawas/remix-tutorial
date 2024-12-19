@@ -21,3 +21,23 @@ export function devLog(message?: any, ...optionalParams: any[]) {
     console.log(message, ...optionalParams);
 }
 
+export function isNullOrEmptyOrBlank(value: string | null | undefined): boolean {
+    if (value == null) return true;
+    if (value == undefined) return true;
+    if (value === "") return true;
+    if (value.trim() === "") return true;
+    return false;
+}
+
+export function isNull(value: number | null | undefined): boolean {
+    if (value == null) return true;
+    if (value == undefined) return true;
+    return false;
+}
+
+export function isNullOrEmpty<T>(value: T[]): boolean {
+    if (value == null) return true;
+    if (value.length === 0) return true;
+    return false;
+}
+

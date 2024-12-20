@@ -1,3 +1,3 @@
 export type Result = {
-    message?: string
-}
+	message?: string;
+};

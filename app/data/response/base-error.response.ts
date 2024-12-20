@@ -1,4 +1,4 @@
 export type BaseErrorResponse = {
-    isError: boolean;
-    errorMessage?: string;
-}
+	isError: boolean;
+	errorMessage?: string;
+};

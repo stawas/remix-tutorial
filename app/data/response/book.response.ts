@@ -5,7 +5,7 @@ export type Author = {
 	CreatedAt: string | null;
 	UpdatedAt: string | null;
 	name: string | null;
-}
+};
 
 export type Publisher = {
 	ID: number | null;
@@ -14,24 +14,21 @@ export type Publisher = {
 	DeletedAt: string | null;
 	details: string | null;
 	name: string | null;
-}
+};
 
-export type BookResponse =
-	BaseErrorResponse & {
-		ID?: number | null;
-		CreatedAt?: string | null;
-		UpdatedAt?: string | null;
-		DeletedAt?: string | null;
-		name?: string | null;
-		description?: string | null;
-		price?: number | null;
-		publisherID?: number | null;
-		publisher?: Publisher | null;
-		authors?: Author[] | null;
-	}
+export type BookResponse = BaseErrorResponse & {
+	ID?: number | null;
+	CreatedAt?: string | null;
+	UpdatedAt?: string | null;
+	DeletedAt?: string | null;
+	name?: string | null;
+	description?: string | null;
+	price?: number | null;
+	publisherID?: number | null;
+	publisher?: Publisher | null;
+	authors?: Author[] | null;
+};
 
-export type BookListResponse =
-	BaseErrorResponse
-	& {
-		books?: BookResponse[];
-	}
+export type BookListResponse = BaseErrorResponse & {
+	books?: BookResponse[];
+};

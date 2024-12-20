@@ -10,6 +10,7 @@ import { login } from "app/data/auth.remote";
 import { devLog, toUserModel } from "app/utils";
 import { accessToken, commitSession, error, getSession } from "app/sessions";
 import { LoginResponse } from "~/data/response/login.response";
+import { useState } from "react";
 
 export async function loader({
     request,
@@ -68,6 +69,15 @@ Password:ldoiekr983lko39
 
 export default function Login() {
     const { error } = useLoaderData<typeof loader>();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
+    function areRequiredFieldsFullfilled(): boolean {
+        if (username.trim() === "") return false;
+        if (password.trim() === "") return false;
+        return true;
+    }
+
     return (
         <div className="container full-width center-main-axis margin-top-16">
             <div className="container direction-column spacing-v-16">
@@ -76,12 +86,22 @@ export default function Login() {
                     <label htmlFor="email">
                         Email
                     </label>
-                    <input id="email" name="email" type="email" defaultValue={`spock@example.com`} />
+                    <input id="email" name="email" type="email"
+                    onChange={(event) => {
+                        devLog(event.target.value);
+                        setUsername(event.target.value);
+                    }} required/>
                     <label htmlFor="password">
                         Password
                     </label>
-                    <input id="password" name="password" type="password" defaultValue={`ldoiekr983lko39`} />
-                    <button type="submit">Login</button>
+                    <input id="password" name="password" type="password" onChange={(event) => {
+                        devLog(event.target.value);
+                        setPassword(event.target.value);
+                    }} required/>
+                    {/*avoid using javascript to disabled button. if user has a slow internet or javascript won't load they can't login*/}
+                    {areRequiredFieldsFullfilled()
+                        ? <button type="submit">Login</button>
+                        : <button disabled type="submit">Login</button>}
                 </form>
                 {error ? <div className="error">{error}</div> : null}
             </div>

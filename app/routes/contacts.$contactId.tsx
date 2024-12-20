@@ -6,13 +6,14 @@ import invariant from "tiny-invariant";
 import {
   Form,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import type { FunctionComponent } from "react";
 
 import { updateContact } from "../data";
 import { requestBook } from "~/data/books.remote";
 import { Author, BookResponse } from "~/data/response/book.response";
-import { isNull, isNullOrEmpty, isNullOrEmptyOrBlank } from "~/utils";
+import { getErrorMessage, isNull, isNullOrEmpty, isNullOrEmptyOrBlank, } from "~/utils";
 
 export const action = async ({
   params,
@@ -31,8 +32,8 @@ export const loader = async ({
 }: LoaderFunctionArgs) => {
   invariant(params.contactId, "Missing bookId param");
   const book: BookResponse | null = await requestBook(request, params.contactId);
-  if (!book) {
-    throw new Response("Not Found", { status: 404 });
+  if (book.isError) {
+    throw new Response(book.errorMessage, { status: 404 });
   }
   return Response.json({ book: book });
 };
@@ -44,7 +45,7 @@ export default function Contact() {
   const showBookName: boolean = !isNullOrEmptyOrBlank(book.publisher?.name);
   const showPrice: boolean = !isNull(book.price);
   const showDescription: boolean = !isNullOrEmptyOrBlank(book.description);
-  
+
   return (
     <div id="contact">
       <div>
@@ -57,7 +58,7 @@ export default function Contact() {
             <i>No Name</i>
           )}
         </h1>
-        <br/>
+        <br />
         {showPrice ? <p>{book.price} baht</p> : null}
         {showDescription ? (
           <p>
@@ -104,3 +105,13 @@ const Authors: FunctionComponent<{ authors: Author[] }>
       </div>
     );
   }
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  const errorMessage: string = getErrorMessage(error);
+
+  return (
+    <h1>{`Error: ${errorMessage} 😡`}</h1>
+  );
+}

@@ -7,9 +7,11 @@ import {
   Meta,
   Outlet,
   Scripts,
+  useRouteError,
 } from "@remix-run/react";
 
 import appStyleHref from "./app.css?url";
+import { devLog } from "./utils";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStyleHref },
@@ -32,6 +34,26 @@ export default function App() {
       </head>
       <body>
         <Outlet />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  devLog(error);
+
+  return (
+    <html lang="en">
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {/* add the UI you want your users to see */}
+        <h1>Error no no no 😭</h1>
         <Scripts />
       </body>
     </html>

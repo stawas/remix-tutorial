@@ -1,3 +1,4 @@
+import { isRouteErrorResponse } from "@remix-run/react";
 import { User } from "app/model/users.model"
 
 export function toUserModel({ formData }: { formData: FormData }): User {
@@ -39,5 +40,20 @@ export function isNullOrEmpty<T>(value: T[]): boolean {
     if (value == null) return true;
     if (value.length === 0) return true;
     return false;
+}
+
+export function getErrorMessage(error: unknown): string {
+    let errorMessage: string = "Unknown error";
+    if (isRouteErrorResponse(error)) {
+        errorMessage = error.data || error.statusText;
+    } else if (error instanceof Error) {
+        errorMessage = error.message;
+    } else if (typeof error === 'string') {
+        errorMessage = error;
+    } else {
+        devLog(error);
+        errorMessage = 'Unknown error';
+    }
+    return errorMessage;
 }
 

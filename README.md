@@ -2,6 +2,15 @@
 
 - [Remix Docs](https://remix.run/docs)
 
+## Can't run npm becuase of PowerShell execution policies(Windows)
+
+From your PowerShell:
+
+```sh
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope CurrentUser
+```
+[Learn more](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.4#powershell-execution-policies)
+
 ## Development
 
 From your terminal:

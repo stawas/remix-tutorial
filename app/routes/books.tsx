@@ -16,7 +16,9 @@ import {
 import { FunctionComponent, useEffect } from "react";
 
 import { requestAllBooks } from "~/data/books.remote";
+import { AuthorResponse } from "~/data/response/author.response";
 import { BookListResponse } from "~/data/response/book.response";
+import { isNullOrEmpty } from "~/utils";
 
 export const action = async () => {
 	return redirect(`/books/create`);
@@ -117,6 +119,23 @@ export default function Books() {
 const BookList: FunctionComponent<{ books: BookListResponse }> = ({
 	books,
 }) => {
+	function getAuthorsDisplayText(
+		authors: AuthorResponse[] | null | undefined
+	): string {
+		const totalAuthors: number = authors?.length ?? 0;
+		const firstAuthorName: string = authors?.at(0)?.name ?? "";
+		if (totalAuthors > 1) {
+			return `By ${firstAuthorName} and ${totalAuthors - 1} others`;
+		}
+		return `By ${firstAuthorName}`;
+	}
+
+	function isShowAuthors(
+		authors: AuthorResponse[] | null | undefined
+	): boolean {
+		return !isNullOrEmpty(authors);
+	}
+
 	if (books.books?.length) {
 		return (
 			<ul>
@@ -130,9 +149,11 @@ const BookList: FunctionComponent<{ books: BookListResponse }> = ({
 						>
 							{book.name ? (
 								<>
-									{book.name} by <br />
-									{book.authors?.map(
-										(item) => item.name + "\n"
+									{book.name} <br />
+									{isShowAuthors(book.authors) ? (
+										getAuthorsDisplayText(book.authors)
+									) : (
+										<></>
 									)}
 								</>
 							) : (

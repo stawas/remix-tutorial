@@ -1,5 +1,6 @@
 import { isRouteErrorResponse } from "@remix-run/react";
 import { User } from "app/model/users.model";
+import { createBookRequest } from "./data/request/create-book.request";
 
 export function toUserModel({ formData }: { formData: FormData }): User {
 	const email = formData.get("email");
@@ -13,6 +14,22 @@ export function toUserModel({ formData }: { formData: FormData }): User {
 	return {
 		Email: email as string,
 		Password: password as string,
+	};
+}
+
+export function toCreateBookRequest({ formData }: { formData: FormData }): createBookRequest {
+	const name = formData.get("name");
+	const description = formData.get("description");
+	const price = formData.get("price");
+	const publisherID = formData.get("publisherID");
+	const authorIDs = formData.getAll("authorIDs");
+	
+	return {
+		name: name as string,
+		description: description as string,
+		price: Number(price), 
+		publisherID: Number(publisherID), 
+		authorIDs: (authorIDs as unknown as string[]).map(id => Number(id)), 
 	};
 }
 
@@ -38,7 +55,7 @@ export function isNull(value: number | null | undefined): boolean {
 	return false;
 }
 
-export function isNullOrEmpty<T>(value: T[] | undefined): boolean {
+export function isNullOrEmpty<T>(value: T[] | null | undefined): boolean {
 	if (value == undefined) return true;
 	if (value == null) return true;
 	if (value.length === 0) return true;

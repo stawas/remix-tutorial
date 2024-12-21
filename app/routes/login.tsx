@@ -14,7 +14,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	if (session.has(accessToken)) {
 		// Redirect to the home page if they are already signed in.
-		return redirect("/contacts");
+		return redirect("/books");
 	}
 
 	const data = { error: session.get(error) };

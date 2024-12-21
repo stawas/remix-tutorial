@@ -1,4 +1,8 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import {
+	ActionFunctionArgs,
+	LoaderFunctionArgs,
+	redirect,
+} from "@remix-run/node";
 import {
 	Form,
 	useLoaderData,
@@ -6,16 +10,19 @@ import {
 	useRouteError,
 } from "@remix-run/react";
 import { requestAllAuthors } from "~/data/authors.remote";
+import { createBook } from "~/data/books.remote";
 import { requestAllPublishers } from "~/data/publishers.remote";
 import {
 	AuthorListResponse,
 	AuthorResponse,
 } from "~/data/response/author.response";
+import { CreateBookResponse } from "~/data/response/create-book.response";
 import {
 	PublisherListResponse,
 	PublisherResponse,
 } from "~/data/response/publisher.response";
-import { getErrorMessage, isNullOrEmpty } from "~/utils";
+import { commitSession, error, getSession } from "~/sessions";
+import { getErrorMessage, isNullOrEmpty, toCreateBookRequest } from "~/utils";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const publishers: PublisherListResponse | null = await requestAllPublishers(
@@ -29,6 +36,24 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		throw new Response("Not Found author", { status: 404 });
 	}
 	return Response.json({ publishers, authors });
+};
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+	const session = await getSession(request.headers.get("Cookie"));
+	const formData: FormData = await request.formData();
+	const response: CreateBookResponse = await createBook(
+		request,
+		toCreateBookRequest({ formData: formData })
+	);
+	if (response.isError) {
+		session.flash(error, response.errorMessage ?? "");
+		return redirect("/books/create", {
+			headers: {
+				"Set-Cookie": await commitSession(session),
+			},
+		});
+	}
+	return redirect(`/books/${response.bookId}`);
 };
 
 export default function CreateBook() {
@@ -52,8 +77,10 @@ export default function CreateBook() {
 					<input
 						aria-label="Book name"
 						name="name"
+						// defaultValue="The Wedding People"
 						placeholder="Book name"
 						type="text"
+						required
 					/>
 				</label>
 				<label className="container direction-column">
@@ -61,7 +88,9 @@ export default function CreateBook() {
 					<textarea
 						aria-label="Book description"
 						name="description"
+						// defaultValue="A propulsive and uncommonly wise novel about one unexpected wedding guest and the surprising people who help her start anew."
 						placeholder="Book description"
+						required
 					/>
 				</label>
 				<label className="container direction-column">
@@ -69,19 +98,24 @@ export default function CreateBook() {
 					<input
 						aria-label="Book price"
 						name="price"
+						// defaultValue="987"
 						placeholder="Book price"
 						type="number"
+						required
 					/>
 				</label>
 				{showPublishers ? (
 					<label className="container direction-column">
 						<span>Publisher</span>
-						<select name="publisher">
+						<select
+							name="publisherID"
+							required
+						>
 							{publishers.publishers?.map(
 								(item: PublisherResponse) => (
 									<option
 										key={item.ID}
-										value={item.name ?? ""}
+										value={item.ID ?? ""}
 									>
 										{item.name ?? ""}
 									</option>
@@ -99,20 +133,25 @@ export default function CreateBook() {
 					<label className="container direction-column">
 						<span>Author</span>
 						<select
-							name="author"
+							name="authorIDs"
 							size={authors.authors?.length}
 							multiple
+							required
 						>
 							{authors.authors?.map((item: AuthorResponse) => (
 								<option
 									key={item.ID}
-									value={item.name ?? ""}
+									value={item.ID ?? ""}
 								>
 									{item.name ?? ""}
 								</option>
 							))}
 						</select>
-                        <span>Hold down the Ctrl (windows) / Command (Mac) button to select multiple options. You can drag mouse to select multiple options.</span>
+						<span>
+							Hold down the Ctrl (windows) / Command (Mac) button
+							to select multiple options. You can drag mouse to
+							select multiple options.
+						</span>
 					</label>
 				) : (
 					<p>

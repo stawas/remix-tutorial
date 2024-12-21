@@ -23,18 +23,15 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 };
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-	invariant(params.contactId, "Missing bookId param");
-	const book: BookResponse | null = await requestBook(
-		request,
-		params.contactId
-	);
+	invariant(params.bookId, "Missing bookId param");
+	const book: BookResponse | null = await requestBook(request, params.bookId);
 	if (book.isError) {
 		throw new Response(book.errorMessage, { status: 404 });
 	}
 	return Response.json({ book: book });
 };
 
-export default function Contact() {
+export default function Book() {
 	const { book: book }: { book: BookResponse } =
 		useLoaderData<typeof loader>();
 
@@ -48,7 +45,7 @@ export default function Contact() {
 			<div>
 				<h1>{book.name ? <>{book.name}</> : <i>No Name</i>}</h1>
 				<br />
-				{showPrice ? <p>{book.price} baht</p> : null}
+				{showPrice ? <p>{book.price} THB</p> : null}
 				{showDescription ? <p>{book.description}</p> : null}
 				{showBookName ? <p>Publish by {book.publisher?.name}</p> : null}
 				{showAuthors ? <Authors authors={book.authors!} /> : null}
@@ -77,7 +74,9 @@ export default function Contact() {
 	);
 }
 
-const Authors: FunctionComponent<{ authors: AuthorResponse[] }> = ({ authors }) => {
+const Authors: FunctionComponent<{ authors: AuthorResponse[] }> = ({
+	authors,
+}) => {
 	return (
 		<div>
 			<p>Written by</p>

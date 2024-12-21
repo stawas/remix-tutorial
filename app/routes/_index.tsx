@@ -3,5 +3,5 @@ import { requireUserSession } from "app/sessions";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await requireUserSession(request);
-	return redirect(`/contacts`);
+	return redirect(`/books`);
 };

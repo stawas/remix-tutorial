@@ -5,13 +5,14 @@ import type { FunctionComponent } from "react";
 
 import { updateContact } from "../data";
 import { requestBook } from "~/data/books.remote";
-import { Author, BookResponse } from "~/data/response/book.response";
+import { BookResponse } from "~/data/response/book.response";
 import {
 	getErrorMessage,
 	isNull,
 	isNullOrEmpty,
 	isNullOrEmptyOrBlank,
 } from "~/utils";
+import { AuthorResponse } from "~/data/response/author.response";
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
 	invariant(params.contactId, "Missing contactId");
@@ -76,7 +77,7 @@ export default function Contact() {
 	);
 }
 
-const Authors: FunctionComponent<{ authors: Author[] }> = ({ authors }) => {
+const Authors: FunctionComponent<{ authors: AuthorResponse[] }> = ({ authors }) => {
 	return (
 		<div>
 			<p>Written by</p>

@@ -15,13 +15,11 @@ import {
 } from "@remix-run/react";
 import { FunctionComponent, useEffect } from "react";
 
-import { ContactRecord, createEmptyContact } from "app/data";
 import { requestAllBooks } from "~/data/books.remote";
 import { BookListResponse } from "~/data/response/book.response";
 
 export const action = async () => {
-	const contact: ContactRecord = await createEmptyContact();
-	return redirect(`/contacts/${contact.id}/edit`);
+	return redirect(`/books/create`);
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -31,7 +29,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	return Response.json({ books, q });
 };
 
-export default function Contacts() {
+export default function Books() {
 	const {
 		books,
 		q,

@@ -1,20 +1,6 @@
+import { AuthorResponse } from "./author.response";
 import { BaseErrorResponse } from "./base-error.response";
-
-export type Author = {
-	ID: number | null;
-	CreatedAt: string | null;
-	UpdatedAt: string | null;
-	name: string | null;
-};
-
-export type Publisher = {
-	ID: number | null;
-	CreatedAt: string | null;
-	UpdatedAt: string | null;
-	DeletedAt: string | null;
-	details: string | null;
-	name: string | null;
-};
+import { PublisherResponse } from "./publisher.response";
 
 export type BookResponse = BaseErrorResponse & {
 	ID?: number | null;
@@ -25,10 +11,11 @@ export type BookResponse = BaseErrorResponse & {
 	description?: string | null;
 	price?: number | null;
 	publisherID?: number | null;
-	publisher?: Publisher | null;
-	authors?: Author[] | null;
+	publisher?: PublisherResponse | null;
+	authors?: AuthorResponse[] | null;
 };
 
 export type BookListResponse = BaseErrorResponse & {
 	books?: BookResponse[];
 };
+

@@ -66,7 +66,7 @@ export async function createBook(
 	const url: URL = new URL(`${scheme}${baseUrl}${bookAPI}/create`);
 	const accessToken = await requireUserSession(request);
 	const requestOptions: Request = new Request(url, {
-		method: "PUT",
+		method: "POST",
 		headers: {
 			Cookie: `jwt=${accessToken}`,
 			"Content-Type": "application/json",

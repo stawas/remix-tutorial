@@ -1,30 +1,25 @@
-import {
-	ActionFunctionArgs,
-	LoaderFunctionArgs,
-	redirect,
-} from "@remix-run/node";
-import {
-	Form,
-	useLoaderData,
-	useNavigate,
-	useRouteError,
-} from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import { Form, useLoaderData, useNavigate } from "@remix-run/react";
+import invariant from "tiny-invariant";
 import { requestAllAuthors } from "~/data/authors.remote";
-import { createBook } from "~/data/books.remote";
+import { editBook, requestBook } from "~/data/books.remote";
 import { requestAllPublishers } from "~/data/publishers.remote";
 import {
 	AuthorListResponse,
 	AuthorResponse,
 } from "~/data/response/author.response";
+import { BookResponse } from "~/data/response/book.response";
 import { UpdateBookResponse } from "~/data/response/create-book.response";
 import {
 	PublisherListResponse,
 	PublisherResponse,
 } from "~/data/response/publisher.response";
 import { commitSession, error, getSession } from "~/sessions";
-import { getErrorMessage, isNullOrEmpty, toBookRequest } from "~/utils";
+import { isNullOrEmpty, toBookRequest } from "~/utils";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+	invariant(params.bookId, "Missing bookId param");
 	const publishers: PublisherListResponse | null = await requestAllPublishers(
 		request
 	);
@@ -35,19 +30,29 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	if (authors.isError) {
 		throw new Response("Not Found author", { status: 404 });
 	}
-	return Response.json({ publishers, authors });
+	const book: BookResponse | null = await requestBook(request, params.bookId);
+	if (book.isError) {
+		throw new Response(book.errorMessage, { status: 404 });
+	}
+	return Response.json({
+		book: book,
+		publishers: publishers,
+		authors: authors,
+	});
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ params, request }: ActionFunctionArgs) => {
+	invariant(params.bookId, "Missing bookId param");
 	const session = await getSession(request.headers.get("Cookie"));
 	const formData: FormData = await request.formData();
-	const response: UpdateBookResponse = await createBook(
+	const response: UpdateBookResponse = await editBook(
 		request,
+		params.bookId,
 		toBookRequest({ formData: formData })
 	);
 	if (response.isError) {
 		session.flash(error, response.errorMessage ?? "");
-		return redirect("/books/create", {
+		return redirect(`/books/${params.bookId}/edit`, {
 			headers: {
 				"Set-Cookie": await commitSession(session),
 			},
@@ -56,28 +61,32 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	return redirect(`/books/${response.bookId}`);
 };
 
-export default function CreateBook() {
+export default function EditBook() {
 	const {
+		book,
 		publishers,
 		authors,
-	}: { publishers: PublisherListResponse; authors: AuthorListResponse } =
-		useLoaderData<typeof loader>();
+	}: {
+		book: BookResponse;
+		publishers: PublisherListResponse;
+		authors: AuthorListResponse;
+	} = useLoaderData<typeof loader>();
 	const showPublishers: boolean = !isNullOrEmpty(publishers.publishers);
 	const showAuthors: boolean = !isNullOrEmpty(authors.authors);
 	const navigate = useNavigate();
 	return (
 		<div>
-			<h1>Create book!</h1>
+			<h1>Edit book!</h1>
 			<Form
 				className="container direction-column spacing-v-16"
-				method="post"
+				method="put"
 			>
 				<label className="container direction-column">
 					<span>Name</span>
 					<input
 						aria-label="Book name"
 						name="name"
-						// defaultValue="The Wedding People"
+						defaultValue={book.name ?? ""}
 						placeholder="Book name"
 						type="text"
 						required
@@ -88,7 +97,7 @@ export default function CreateBook() {
 					<textarea
 						aria-label="Book description"
 						name="description"
-						// defaultValue="A propulsive and uncommonly wise novel about one unexpected wedding guest and the surprising people who help her start anew."
+						defaultValue={book.description ?? ""}
 						placeholder="Book description"
 						required
 					/>
@@ -98,7 +107,7 @@ export default function CreateBook() {
 					<input
 						aria-label="Book price"
 						name="price"
-						// defaultValue="987"
+						defaultValue={book.price ?? 0}
 						placeholder="Book price"
 						type="number"
 						required
@@ -116,7 +125,7 @@ export default function CreateBook() {
 									<option
 										key={item.ID}
 										value={item.ID ?? ""}
-									>
+									selected={item.ID === book.publisherID}>
 										{item.name ?? ""}
 									</option>
 								)
@@ -142,6 +151,7 @@ export default function CreateBook() {
 								<option
 									key={item.ID}
 									value={item.ID ?? ""}
+									selected={book.authors?.some((author)=>item.ID === author.ID)}
 								>
 									{item.name ?? ""}
 								</option>
@@ -169,12 +179,4 @@ export default function CreateBook() {
 			</Form>
 		</div>
 	);
-}
-
-export function ErrorBoundary() {
-	const error = useRouteError();
-
-	const errorMessage: string = getErrorMessage(error);
-
-	return <h1>{`Error: ${errorMessage} 😡`}</h1>;
 }

@@ -1,4 +1,4 @@
-export type createBookRequest = {
+export type BookRequest = {
     name: string;
     description: string;
     price: number;

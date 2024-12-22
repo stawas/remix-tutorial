@@ -5,8 +5,8 @@ import {
 	BookResponse,
 } from "app/data/response/book.response";
 import { requireUserSession } from "~/sessions";
-import { createBookRequest } from "./request/create-book.request";
-import { CreateBookResponse } from "./response/create-book.response";
+import { BookRequest } from "./request/book.request";
+import { UpdateBookResponse } from "./response/create-book.response";
 
 export async function requestAllBooks(
 	request: Request
@@ -60,12 +60,12 @@ export async function requestBook(
 
 export async function createBook(
 	request: Request,
-	body: createBookRequest,
-): Promise<CreateBookResponse> {
+	body: BookRequest,
+): Promise<UpdateBookResponse> {
 	const url: URL = new URL(`${scheme}${baseUrl}${bookAPI}/create`);
 	const accessToken = await requireUserSession(request);
 	const requestOptions: Request = new Request(url, {
-		method: "POST",
+		method: "PUT",
 		headers: {
 			Cookie: `jwt=${accessToken}`,
 			"Content-Type": "application/json",
@@ -80,7 +80,35 @@ export async function createBook(
 	const responseContent = await response.json();
 	devLog(responseContent);
 
-	const result: CreateBookResponse = responseContent;
+	const result: UpdateBookResponse = responseContent;
+
+	return result;
+}
+
+export async function editBook(
+	request: Request,
+	bookId: string,
+	body: BookRequest,
+): Promise<UpdateBookResponse> {
+	const url: URL = new URL(`${scheme}${baseUrl}${bookAPI}/edit/${bookId}`);
+	const accessToken = await requireUserSession(request);
+	const requestOptions: Request = new Request(url, {
+		method: "PUT",
+		headers: {
+			Cookie: `jwt=${accessToken}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+	const response: Response = await fetch(requestOptions);
+	if (!response.ok) {
+		return await response.json();
+	}
+
+	const responseContent = await response.json();
+	devLog(responseContent);
+
+	const result: UpdateBookResponse = responseContent;
 
 	return result;
 }

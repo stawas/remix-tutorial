@@ -1,6 +1,6 @@
 import { isRouteErrorResponse } from "@remix-run/react";
 import { User } from "app/model/users.model";
-import { createBookRequest } from "./data/request/create-book.request";
+import { BookRequest } from "./data/request/book.request";
 
 export function toUserModel({ formData }: { formData: FormData }): User {
 	const email = formData.get("email");
@@ -17,7 +17,7 @@ export function toUserModel({ formData }: { formData: FormData }): User {
 	};
 }
 
-export function toCreateBookRequest({ formData }: { formData: FormData }): createBookRequest {
+export function toBookRequest({ formData }: { formData: FormData }): BookRequest {
 	const name = formData.get("name");
 	const description = formData.get("description");
 	const price = formData.get("price");
@@ -29,7 +29,7 @@ export function toCreateBookRequest({ formData }: { formData: FormData }): creat
 		description: description as string,
 		price: Number(price), 
 		publisherID: Number(publisherID), 
-		authorIDs: (authorIDs as unknown as string[]).map(id => Number(id)), 
+		authorIDs: authorIDs.map(id => Number(id)), 
 	};
 }
 

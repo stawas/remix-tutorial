@@ -9,9 +9,6 @@ export const links: LinksFunction = () => [
 	{ rel: "stylesheet", href: appStyleHref },
 ];
 
-// TODO create book detail
-// TODO edit book detail
-// TODO delete book detail
 // TODO search book
 // TODO register
 export default function App() {

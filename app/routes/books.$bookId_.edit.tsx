@@ -25,10 +25,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	);
 	const authors: AuthorListResponse | null = await requestAllAuthors(request);
 	if (publishers.isError) {
-		throw new Response("Not Found publisher", { status: 404 });
+		throw new Response(publishers.errorMessage, { status: 404 });
 	}
 	if (authors.isError) {
-		throw new Response("Not Found author", { status: 404 });
+		throw new Response(authors.errorMessage, { status: 404 });
 	}
 	const book: BookResponse | null = await requestBook(request, params.bookId);
 	if (book.isError) {

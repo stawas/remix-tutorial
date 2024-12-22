@@ -7,6 +7,7 @@ import {
 import { requireUserSession } from "~/sessions";
 import { BookRequest } from "./request/book.request";
 import { UpdateBookResponse } from "./response/create-book.response";
+import { Result } from "./response/result.response";
 
 export async function requestAllBooks(
 	request: Request
@@ -113,3 +114,29 @@ export async function editBook(
 	return result;
 }
 
+
+export async function deleteBook(
+	request: Request,
+	bookId: string,
+): Promise<Result> {
+	const url: URL = new URL(`${scheme}${baseUrl}${bookAPI}/delete/${bookId}`);
+	const accessToken = await requireUserSession(request);
+	const requestOptions: Request = new Request(url, {
+		method: "DELETE",
+		headers: {
+			Cookie: `jwt=${accessToken}`,
+			"Content-Type": "application/json",
+		},
+	});
+	const response: Response = await fetch(requestOptions);
+	if (!response.ok) {
+		return await response.json();
+	}
+
+	const responseContent = await response.json();
+	devLog(responseContent);
+
+	const result: Result = responseContent;
+
+	return result;
+}

@@ -1,9 +1,8 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import { Form, useLoaderData, useRouteError } from "@remix-run/react";
 import type { FunctionComponent } from "react";
 
-import { updateContact } from "../data";
 import { requestBook } from "~/data/books.remote";
 import { BookResponse } from "~/data/response/book.response";
 import {
@@ -13,14 +12,6 @@ import {
 	isNullOrEmptyOrBlank,
 } from "~/utils";
 import { AuthorResponse } from "~/data/response/author.response";
-
-export const action = async ({ params, request }: ActionFunctionArgs) => {
-	invariant(params.contactId, "Missing contactId");
-	const formData = await request.formData();
-	return updateContact(params.contactId, {
-		favorite: formData.get("favorite") === "true",
-	});
-};
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	invariant(params.bookId, "Missing bookId param");

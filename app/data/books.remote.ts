@@ -59,6 +59,32 @@ export async function requestBook(
 	return result;
 }
 
+export async function requestBookByQuery(
+	request: Request,
+	query: string
+): Promise<BookListResponse> {
+	const url: URL = new URL(`${scheme}${baseUrl}${bookAPI}/search`);
+	url.searchParams.append("q", query);
+	const accessToken = await requireUserSession(request);
+	const requestOptions: Request = new Request(url, {
+		method: "GET",
+		headers: {
+			Cookie: `jwt=${accessToken}`,
+			"Content-Type": "application/json",
+		},
+	});
+	const response: Response = await fetch(requestOptions);
+	if (!response.ok) {
+		return await response.json();
+	}
+
+	const responseContent = await response.json();
+	devLog(responseContent);
+	const result: BookResponse = responseContent;
+
+	return result;
+}
+
 export async function createBook(
 	request: Request,
 	body: BookRequest,

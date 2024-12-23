@@ -15,10 +15,10 @@ import {
 } from "@remix-run/react";
 import { FunctionComponent, useEffect } from "react";
 
-import { requestAllBooks } from "~/data/books.remote";
+import { requestAllBooks, requestBookByQuery } from "~/data/books.remote";
 import { AuthorResponse } from "~/data/response/author.response";
 import { BookListResponse } from "~/data/response/book.response";
-import { isNullOrEmpty } from "~/utils";
+import { isNullOrEmpty, isNullOrEmptyOrBlank } from "~/utils";
 
 export const action = async () => {
 	return redirect(`/books/create`);
@@ -27,8 +27,13 @@ export const action = async () => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const url: URL = new URL(request.url);
 	const q: string | null = url.searchParams.get("q");
-	const books: BookListResponse = await requestAllBooks(request);
-	return Response.json({ books, q });
+	if (isNullOrEmptyOrBlank(q)) {
+		const books: BookListResponse = await requestAllBooks(request);
+		return Response.json({ books, q });
+	} else {
+		const books: BookListResponse = await requestBookByQuery(request, q!);
+		return Response.json({ books, q });
+	}
 };
 
 export default function Books() {

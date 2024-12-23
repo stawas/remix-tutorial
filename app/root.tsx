@@ -3,13 +3,12 @@ import type { LinksFunction } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts, useRouteError } from "@remix-run/react";
 
 import appStyleHref from "./app.css?url";
-import { devLog } from "./utils";
+import { getErrorMessage } from "./utils";
 
 export const links: LinksFunction = () => [
 	{ rel: "stylesheet", href: appStyleHref },
 ];
 
-// TODO search book
 // TODO register
 export default function App() {
 	return (
@@ -33,7 +32,8 @@ export default function App() {
 
 export function ErrorBoundary() {
 	const error = useRouteError();
-	devLog(error);
+
+	const errorMessage: string = getErrorMessage(error);
 
 	return (
 		<html lang="en">
@@ -44,7 +44,7 @@ export function ErrorBoundary() {
 			</head>
 			<body>
 				{/* add the UI you want your users to see */}
-				<h1>Error no no no 😭</h1>
+				<h1>{`Error: ${errorMessage} 😡`}</h1>
 				<Scripts />
 			</body>
 		</html>

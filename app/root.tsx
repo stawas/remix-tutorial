@@ -1,53 +1,52 @@
-import {
-  Form,
-  Links,
-  Meta,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+// https://remix.run/docs/en/main/start/tutorial#data-mutations
+import type { LinksFunction } from "@remix-run/node";
+import { Links, Meta, Outlet, Scripts, useRouteError } from "@remix-run/react";
 
+import appStyleHref from "./app.css?url";
+import { getErrorMessage } from "./utils";
+
+export const links: LinksFunction = () => [
+	{ rel: "stylesheet", href: appStyleHref },
+];
+
+// TODO register
 export default function App() {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <div id="sidebar">
-          <h1>Remix Contacts</h1>
-          <div>
-            <Form id="search-form" role="search">
-              <input
-                id="q"
-                aria-label="Search contacts"
-                placeholder="Search"
-                type="search"
-                name="q"
-              />
-              <div id="search-spinner" aria-hidden hidden={true} />
-            </Form>
-            <Form method="post">
-              <button type="submit">New</button>
-            </Form>
-          </div>
-          <nav>
-            <ul>
-              <li>
-                <a href={`/contacts/1`}>Your Name</a>
-              </li>
-              <li>
-                <a href={`/contacts/2`}>Your Friend</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
+	return (
+		<html lang="en">
+			<head>
+				<meta charSet="utf-8" />
+				<meta
+					name="viewport"
+					content="width=device-width, initial-scale=1"
+				/>
+				<Meta />
+				<Links />
+			</head>
+			<body>
+				<Outlet />
+				<Scripts />
+			</body>
+		</html>
+	);
+}
 
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
+export function ErrorBoundary() {
+	const error = useRouteError();
+
+	const errorMessage: string = getErrorMessage(error);
+
+	return (
+		<html lang="en">
+			<head>
+				<title>Oh no!</title>
+				<Meta />
+				<Links />
+			</head>
+			<body>
+				{/* add the UI you want your users to see */}
+				<h1>{`Error: ${errorMessage} 😡`}</h1>
+				<Scripts />
+			</body>
+		</html>
+	);
 }
